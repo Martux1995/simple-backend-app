@@ -1,5 +1,5 @@
 pipeline {
-    agent { dockerfile true }
+    agent any
 
     stages {
         stage('prebuild') {
@@ -9,20 +9,30 @@ pipeline {
             steps { sh 'npm run test' }
         }
         stage('build') {
-            steps { sh 'npm run build' }
+            steps { 
+                sh 'docker build -t martux1995/simple-backend-app:latest'
+            }
         }
 
         stage('Push Image to DockerHub') {
             steps { 
-                def image = docker.build('martux1995/simple-backend-app:latest')
-                image.push()
+                withCredentials([usernamePassword(credentialsId: 'DockerHub', passwordVariable: 'dockerHubPass', usernameVariable: 'dockerHubUser')]) {
+                sh 'echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser}'
+                sh 'docker push martux1995/simple-backend-app:latest'
+                }
+            }
+        }
+
+        stage('Clean') {
+            steps {
+                sh 'docker rmi martux1995/simple-backend-app:latest'
             }
         }
 
         stage('Deploy in Minikube') {
             steps {
                 withCredentials(bindings: [
-                    string(credencialsId: 'kubernetes-jenkins-server-account', variable: 'api_token')
+                    string(credencialsId: 'Minikube_Service_Token', variable: 'api_token')
                 ]) {
                     sh 'kubectl --token $api_token apply -f kube/deploy.prod.yaml'
                 }
