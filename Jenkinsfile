@@ -6,9 +6,10 @@ pipeline {
     }
     
     stages {
-        stage('Get Code') {
+        stage('Run Tests') {
             steps {
-                git url: 'https://github.com/martux1995/simple-backend-app.git', branch: 'feat/jenkins-deploy'
+                sh 'npm install'
+                sh 'npm run test'
             }
         }
         stage('build') {
