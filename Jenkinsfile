@@ -17,7 +17,7 @@ pipeline {
         stage('Push Image to DockerHub') {
             steps { 
                 withCredentials([usernamePassword(credentialsId: 'DockerHub', passwordVariable: 'dockerHubPass', usernameVariable: 'dockerHubUser')]) {
-                sh 'echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser}'
+                sh 'echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin'
                 sh 'docker push martux1995/simple-backend-app:latest'
                 }
             }
