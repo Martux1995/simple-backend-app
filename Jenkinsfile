@@ -2,26 +2,30 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDS = credentials('DockerHub')
+        dockerImage = ''
     }
     
     stages {
-        stage('prebuild') {
-            steps { sh 'npm install' }
-        }
-        stage('testing') {
-            steps { sh 'npm run test' }
+        stage('Get Code') {
+            steps {
+                git url: 'https://github.com/martux1995/simple-backend-app.git', branch: 'feat/jenkins-deploy'
+            }
         }
         stage('build') {
             steps { 
-                sh 'docker build -t martux1995/simple-backend-app:latest .'
+                script {
+                    dockerImage = docker.build('martux1995/simple-backend-app:latest')
+                }
             }
         }
 
         stage('Push Image to DockerHub') {
             steps {
-                sh('docker login -u $DOCKERHUB_CREDS_USR -p $DOCKERHUB_CREDS_PSW')
-                sh 'docker push martux1995/simple-backend-app:latest'
+                script {
+                    docker.withRegistry('', 'DockerHub') {
+                        dockerImage.push()
+                    }
+                }
             }
         }
 
@@ -34,9 +38,9 @@ pipeline {
         stage('Deploy in Minikube') {
             steps {
                 withCredentials(bindings: [
-                    string(credencialsId: 'Minikube_Service_Token', variable: 'api_token')
+                    string(credentialsId: 'Minikube_Service_Token', variable: 'api_token')
                 ]) {
-                    sh 'kubectl --token $api_token apply -f kube/deploy.prod.yaml'
+                    sh 'kubectl --token $api_token apply --server https://192.168.49.2:8443 --insecure-skip-tls-verify=true -f kube/deploy.prod.yaml'
                 }
             }
         }
