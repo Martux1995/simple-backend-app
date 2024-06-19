@@ -10,7 +10,7 @@ pipeline {
         }
         stage('build') {
             steps { 
-                sh 'docker build -t martux1995/simple-backend-app:latest'
+                sh 'docker build -t martux1995/simple-backend-app:latest .'
             }
         }
 
