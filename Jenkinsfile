@@ -17,7 +17,7 @@ pipeline {
         stage('Push Image to DockerHub') {
             steps { 
                 withCredentials([usernamePassword(credentialsId: 'DockerHub', passwordVariable: 'dockerHubPass', usernameVariable: 'dockerHubUser')]) {
-                sh 'echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin'
+                sh "echo ${env.dockerHubPass} | docker login -u ${env.dockerHubUser} --password-stdin"
                 sh 'docker push martux1995/simple-backend-app:latest'
                 }
             }
@@ -34,7 +34,7 @@ pipeline {
                 withCredentials(bindings: [
                     string(credencialsId: 'Minikube_Service_Token', variable: 'api_token')
                 ]) {
-                    sh 'kubectl --token $api_token apply -f kube/deploy.prod.yaml'
+                    sh "kubectl --token $api_token apply -f kube/deploy.prod.yaml"
                 }
             }
         }
