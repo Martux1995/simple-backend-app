@@ -1,6 +1,6 @@
 ## Simple Backend App
 
-This repository was created for jenkins test only. testing
+This repository was created for jenkins test only.
 
 ## Installation
 
